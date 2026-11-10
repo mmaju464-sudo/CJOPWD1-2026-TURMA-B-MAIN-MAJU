@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+
+{% block title %}iFitness - Meu painel{% endblock %}
+
+{% block navbar %}
+    {% include 'navbar.html' %}
+{% endblock %}
+
+{% block content %}
+
+  
+<div class="container-fluid dashboard-container py-4"
+     data-api-url="{{ url_for('api_dados_dashboard') }}">
+
+    <!-- Cabeçalho -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-success fw-semibold mb-1">SEU ESPAÇO DE SAÚDE</p>
+            <h1 class="dashboard-title mb-1">
+                Olá, {{ session.get('nome_usuario', 'atleta') }}!
+            </h1>
+            <p class="text-muted mb-0">
+                Acompanhe suas atividades e veja sua evolução.
+            </p>
+        </div>
+
+        <a href="{{ url_for('cadastro_atividade') }}" class="btn btn-success btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Nova atividade
+        </a>
+    </div>
+
+    <!-- Indicadores centralizados -->
+    <div class="row g-3 mb-4 justify-content-center">
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card dashboard-stat h-100">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-signpost-2"></i>
+                    </div>
+                    <p class="stat-label">Distância total</p>
+                    <div class="stat-value">
+                        <span id="total-distancia">—</span>
+                        <small>km</small>
+                    </div>
+                    <p class="stat-note mb-0">
+                        Somatório das suas atividades
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card dashboard-stat h-100">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-stopwatch"></i>
+                    </div>
+                    <p class="stat-label">Tempo de atividade</p>
+                    <div class="stat-value">
+                        <span id="total-duracao">—</span>
+                        <small>min</small>
+                    </div>
+                    <p class="stat-note mb-0">
+                        Tempo total registrado
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card dashboard-stat h-100">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <p class="stat-label">Treinos registrados</p>
+                    <div class="stat-value" id="total-treinos">—</div>
+                    <p class="stat-note mb-0">
+                        Atividades cadastradas por você
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clima -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card p-3 shadow-sm border-start border-info border-4 text-center h-100">
+                <h6 class="text-muted text-uppercase small" id="climaCidade">Clima agora</h6>
+                <h3 class="fw-bold text-info" id="climaTemperatura">-- °C</h3>
+                <span class="text-muted small" id="climaDescricao">Consultando...</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+    <!-- Gráficos -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-lg-7">
+            <section class="card dashboard-panel h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h2 class="panel-title mb-1">Distância por dia</h2>
+                            <p class="text-muted small mb-0">
+                                Quilômetros registrados em cada data
+                            </p>
+                        </div>
+                        <i class="bi bi-bar-chart-line panel-heading-icon"></i>
+                    </div>
+
+                    <div id="grafico-dias" class="simple-chart">
+                        <p class="text-muted mb-0">
+                            Carregando seus dados...
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <section class="card dashboard-panel h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h2 class="panel-title mb-1">
+                                Atividades por categoria
+                            </h2>
+                            <p class="text-muted small mb-0">
+                                Quantidade de registros
+                            </p>
+                        </div>
+                        <i class="bi bi-pie-chart panel-heading-icon"></i>
+                    </div>
+
+                    <div id="categorias-lista">
+                        <p class="text-muted mb-0">
+                            Carregando seus dados...
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <!-- Atividades recentes -->
+    <section class="card dashboard-panel">
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h2 class="panel-title mb-1">
+                        Acompanhe seus registros
+                    </h2>
+                    <p class="text-muted small mb-0">
+                        Consulte e organize suas atividades.
+                    </p>
+                </div>
+
+                <a href="{{ url_for('listar_atividades') }}"
+                   class="btn btn-outline-success">
+                    Ver todas <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div id="ultimas-atividades" class="table-responsive">
+                <p class="text-muted mb-0">
+                    Carregando suas atividades...
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <div id="dashboard-erro"
+         class="alert alert-warning mt-3 d-none"
+         role="alert">
+        Não foi possível carregar os dados do painel.
+        Atualize a página ou entre novamente na sua conta.
+    </div>
+
+</div>
+
+<style>
+   .dashboard-container {
+    max-width: 1250px;
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 75px;
+}
+
+    .dashboard-title {
+        color: #183b2b;
+        font-size: clamp(1.7rem, 3vw, 2.35rem);
+        font-weight: 750;
+    }
+
+    .dashboard-stat,
+    .dashboard-panel {
+        border: 1px solid #e6eee8;
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(25, 70, 42, .055);
+    }
+
+    .dashboard-stat .card-body {
+        padding: 1.35rem;
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        color: #278348;
+        background: #eaf6ed;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-label {
+        color: #64736a;
+        margin-bottom: .25rem;
+        font-size: .94rem;
+    }
+
+    .stat-value {
+        color: #183b2b;
+        font-size: 2rem;
+        font-weight: 750;
+        line-height: 1.25;
+    }
+
+    .stat-value small {
+        color: #718078;
+        font-size: .9rem;
+        font-weight: 500;
+    }
+
+    .stat-note {
+        color: #849088;
+        font-size: .82rem;
+        margin-top: .35rem;
+    }
+
+    .dashboard-panel .card-body {
+        padding: 1.35rem;
+    }
+
+    .panel-title {
+        color: #183b2b;
+        font-size: 1.12rem;
+        font-weight: 700;
+    }
+
+    .panel-heading-icon {
+        color: #398b54;
+        font-size: 1.4rem;
+    }
+
+    .simple-chart {
+        min-height: 190px;
+        display: flex;
+        align-items: end;
+        gap: 12px;
+        padding: 18px 5px 4px;
+        overflow-x: auto;
+    }
+
+    .chart-column {
+        min-width: 42px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: end;
+        height: 175px;
+        gap: 7px;
+    }
+
+    .chart-bar {
+        width: min(34px, 75%);
+        min-height: 3px;
+        background: #4b9b62;
+        border-radius: 8px 8px 3px 3px;
+    }
+
+    .chart-number {
+        color: #53645a;
+        font-size: .72rem;
+    }
+
+    .chart-date {
+        color: #78847c;
+        font-size: .7rem;
+        white-space: nowrap;
+    }
+
+    .category-row {
+        margin-bottom: 1rem;
+    }
+
+    .category-info {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        color: #46564b;
+        font-size: .9rem;
+        margin-bottom: .35rem;
+    }
+
+    .category-track {
+        height: 9px;
+        background: #edf2ee;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .category-fill {
+        height: 100%;
+        background: #4b9b62;
+        border-radius: 20px;
+    }
+
+    .dashboard-table th {
+        color: #64736a;
+        font-size: .82rem;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    .dashboard-table td {
+        vertical-align: middle;
+        color: #34483a;
+    }
+
+    .category-pill {
+        display: inline-block;
+        padding: .3rem .65rem;
+        border-radius: 20px;
+        background: #eaf6ed;
+        color: #287342;
+        font-size: .8rem;
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-panel .card-body {
+            padding: 1rem;
+        }
+
+        .dashboard-stat .card-body {
+            padding: 1.1rem;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}

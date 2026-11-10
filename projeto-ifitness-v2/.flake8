@@ -1,0 +1,4 @@
+[flake8]
+# a PEP 8 sugere 79 colunas; a equipe do projeto combinou 110
+max-line-length = 110
+exclude = venv,.venv,__pycache__,instance

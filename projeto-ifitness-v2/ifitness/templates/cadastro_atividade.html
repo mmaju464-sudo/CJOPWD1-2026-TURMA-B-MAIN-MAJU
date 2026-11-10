@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}IFitness - Cadastro de Atividades{% endblock %}
+
+{% block navbar %}
+{% include 'navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="col-sm-12 col-lg-6 offset-lg-3">
+        <h1>Cadastro de Atividades Físicas</h1>
+    </div>
+    <hr>
+    <div class="col-lg-6 offset-lg-3 col-sm-12">
+        <form action="{{ url_for('salvar_atividade', id=id) }}" method="POST">
+            <div class="mb-2">
+                <label for="categoria">Categoria:</label>
+                <select name="categoria" id="categoria" class="form-control" required>
+                    <option value="" hidden>Selecione uma categoria</option>
+                    <option value="Caminhada" {% if atividade.categoria == 'Caminhada' %}selected{% endif %}>Caminhada</option>
+                    <option value="Ciclismo" {% if atividade.categoria == 'Ciclismo' %}selected{% endif %}>Ciclismo</option>
+                    <option value="Corrida" {% if atividade.categoria == 'Corrida' %}selected{% endif %}>Corrida</option>
+                    <option value="Natação" {% if atividade.categoria == 'Natação' %}selected{% endif %}>Natação</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label for="data">Data de realização</label>
+                <input type="date" name="data" id="data" class="form-control" 
+                    value="{{ atividade.data.strftime('%Y-%m-%d') if atividade.data else '' }}" required />
+            </div>
+            <div class="mb-2">
+                <label for="distancia">Distância (em Km):</label>
+                <input type="number" class="form-control" step="0.1" name="distancia" id="distancia" 
+                    value="{{ atividade.distancia if atividade.distancia else '' }}" required />
+            </div>
+            <div class="mb-2">
+                <label for="duracao">Duração (em minutos):</label>
+                <input type="number" class="form-control" step="1" name="duracao" id="duracao" 
+                    value="{{ atividade.duracao if atividade.duracao else '' }}" required />
+            </div>
+            <div class="mb-2">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+            <a href="{{ url_for('home') }}" id="link" class="btn btn-secondary">
+                Voltar
+            </a>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
